@@ -56,6 +56,7 @@
         _queue = dispatch_queue_create("com.mccree.upnp.dlna", DISPATCH_QUEUE_SERIAL);
         _deviceDictionary = [NSMutableDictionary dictionary];
         _udpSocket = [[GCDAsyncUdpSocket alloc] initWithDelegate:self delegateQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)];
+        [self connect];
     }
     return self;
 }
@@ -64,7 +65,10 @@
     return [NSString stringWithFormat:@"M-SEARCH * HTTP/1.1\r\nHOST: %@:%d\r\nMAN: \"ssdp:discover\"\r\nMX: 3\r\nST: %@\r\nUSER-AGENT: iOS UPnP/1.1 mccree/1.0\r\n\r\n", ssdpAddres, ssdpPort, serviceType_AVTransport];
 }
 
-- (void)start{
+- (void)connect {
+    if (!_udpSocket.isClosed) {
+        return;
+    }
     NSError *error = nil;
     if (![_udpSocket bindToPort:ssdpPort error:&error]){
         [self onError:error];
@@ -79,6 +83,10 @@
     {
         [self onError:error];
     }
+}
+
+- (void)start{
+    [self connect];
     [self search];
 }
 
@@ -103,11 +111,6 @@
 #pragma mark -- GCDAsyncUdpSocketDelegate --
 - (void)udpSocket:(GCDAsyncUdpSocket *)sock didSendDataWithTag:(long)tag{
     CLLog(@"发送信息成功");
-     __weak typeof (self) weakSelf = self;
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(weakSelf.searchTime * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        weakSelf.receiveDevice = NO;
-        CLLog(@"搜索结束");
-    });
 }
 
 - (void)udpSocket:(GCDAsyncUdpSocket *)sock didNotSendDataWithTag:(long)tag dueToError:(NSError * _Nullable)error{
