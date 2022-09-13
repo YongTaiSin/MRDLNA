@@ -56,7 +56,6 @@
         _queue = dispatch_queue_create("com.mccree.upnp.dlna", DISPATCH_QUEUE_SERIAL);
         _deviceDictionary = [NSMutableDictionary dictionary];
         _udpSocket = [[GCDAsyncUdpSocket alloc] initWithDelegate:self delegateQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)];
-        [self connect];
     }
     return self;
 }
@@ -66,20 +65,20 @@
 }
 
 - (void)connect {
-    if (!_udpSocket.isClosed) {
-        return;
+    if (_udpSocket.isConnected || !_udpSocket.isClosed) {
+        [_udpSocket close];
     }
     NSError *error = nil;
     if (![_udpSocket bindToPort:ssdpPort error:&error]){
-        [self onError:error];
-    }
-    
-    if (![_udpSocket beginReceiving:&error])
-    {
-        [self onError:error];
+        NSLog(@"UDP绑定本地端口错误，重复绑定错误可忽略:\n%@\n", error);
     }
     
     if (![_udpSocket joinMulticastGroup:ssdpAddres error:&error])
+    {
+        NSLog(@"UDP加入组网错误，重复加入错误可忽略:\n%@\n", error);
+    }
+    
+    if (![_udpSocket beginReceiving:&error])
     {
         [self onError:error];
     }
