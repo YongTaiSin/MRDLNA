@@ -65,9 +65,6 @@
 }
 
 - (void)connect {
-    if (_udpSocket.isConnected || !_udpSocket.isClosed) {
-        [_udpSocket close];
-    }
     NSError *error = nil;
     if (![_udpSocket bindToPort:ssdpPort error:&error]){
         NSLog(@"UDP绑定本地端口错误，重复绑定错误可忽略:\n%@\n", error);
