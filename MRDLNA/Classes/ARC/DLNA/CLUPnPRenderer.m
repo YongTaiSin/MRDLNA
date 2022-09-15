@@ -163,7 +163,8 @@
         GDataXMLElement *ele = [array objectAtIndex:i];
         if ([[ele name] hasSuffix:@"SetAVTransportURIResponse"]) {
             [self _SetAVTransportURIResponse];
-            [self getTransportInfo];
+            //  注释这行获取状态代码，可能会返回STOPPED异常状态
+//            [self getTransportInfo];
         }else if ([[ele name] hasSuffix:@"SetNextAVTransportURIResponse"]){
             [self _SetNextAVTransportURIResponse];
         }else if ([[ele name] hasSuffix:@"PauseResponse"]){
