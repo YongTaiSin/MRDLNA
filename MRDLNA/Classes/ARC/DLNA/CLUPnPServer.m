@@ -70,6 +70,11 @@
         NSLog(@"UDP绑定本地端口错误，重复绑定错误可忽略:\n%@\n", error);
     }
     
+    if (![_udpSocket enableBroadcast:YES error:&error])
+    {
+        NSLog(@"UDP广播错误，可忽略:\n%@\n", error);
+    }
+    
     if (![_udpSocket joinMulticastGroup:ssdpAddres error:&error])
     {
         NSLog(@"UDP加入组网错误，重复加入错误可忽略:\n%@\n", error);
